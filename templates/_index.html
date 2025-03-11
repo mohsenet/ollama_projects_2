@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Prompt</title>
+    <style>
+        /* Add some basic styling */
+        #responseOutput {
+            white-space: pre-wrap; /* Preserve line breaks */
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        strong {
+            font-weight: bold;
+        }
+        ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enter your prompt for Ollama</h1>
+    <form id="promptForm">
+        {% csrf_token %}  <!-- Include CSRF token for security -->
+        <textarea id="promptInput" name="prompt" rows="10" cols="50" placeholder="Enter your prompt here..."></textarea>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Response:</h2>
+    <div id="responseOutput"></div>  <!-- Updated to use a div for HTML content -->
+
+<script>
+    // Handle form submission using AJAX
+    document.getElementById('promptForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the form from submitting the traditional way
+
+        // Get the prompt from the textarea
+        const prompt = document.getElementById('promptInput').value;
+
+        // Get the CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Send the prompt to the Django server
+        fetch('/send-prompt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken  // Include CSRF token for security
+            },
+            body: JSON.stringify({ prompt: prompt })
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Handle HTTP errors (e.g., 400, 500)
+                return response.text().then(text => {
+                    throw new Error(`Server error: ${response.status} - ${text}`);
+                });
+            }
+            return response.json(); // Parse the response as JSON
+        })
+        .then(data => {
+            // Parse and display the response in HTML
+            const responseOutput = document.getElementById('responseOutput');
+            responseOutput.innerHTML = formatResponse(data);
+        })
+        .catch(error => {
+            // Display the error message
+            document.getElementById('responseOutput').textContent = `Error: ${error.message}`;
+            console.error('Error:', error);
+        });
+    });
+
+    // Function to format the response as HTML
+    function formatResponse(responseText) {
+        // Replace newlines with <br> tags
+        let formattedText = responseText.replace(/\n/g, '<br>');
+
+        // Replace **text** with <strong>text</strong> for bold formatting
+        formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Replace numbered steps with an ordered list
+        formattedText = formattedText.replace(/(\d+\.\s+.*?)(<br>|$)/g, '<li>$1</li>');
+        formattedText = formattedText.replace(/<li>(.*?)<\/li>/g, '<ol><li>$1</li></ol>');
+
+        // Wrap the entire response in a <div> for styling
+        return `<div>${formattedText}</div>`;
+    }
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1.0">#}
+{#    <title>Ollama Prompt</title>#}
+{#</head>#}
+{#<body>#}
+{#    <h1>Enter your prompt for Ollama</h1>#}
+{#    <form id="promptForm">#}
+{#        {% csrf_token %}  <!-- Include CSRF token for security -->#}
+{#        <textarea id="promptInput" name="prompt" rows="10" cols="50" placeholder="Enter your prompt here..."></textarea>#}
+{#        <br><br>#}
+{#        <button type="submit">Submit</button>#}
+{#    </form>#}
+{##}
+{#    <h2>Response:</h2>#}
+{#    <pre id="responseOutput"></pre>#}
+{##}
+{#    <script>#}
+{#        // Handle form submission using AJAX#}
+{#        document.getElementById('promptForm').addEventListener('submit', function (event) {#}
+{##}
+{#            console.log('step_1')#}
+{##}
+{#            event.preventDefault(); // Prevent the form from submitting the traditional way#}
+{##}
+{#            console.log('step_2')#}
+{##}
+{#            // Get the prompt from the textarea#}
+{#            const prompt = document.getElementById('promptInput').value;#}
+{##}
+{#            console.log('step_3')#}
+{##}
+{#            // Get the CSRF token#}
+{#            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;#}
+{##}
+{#            console.log('step_4')#}
+{##}
+{#            // Send the prompt to the Django server#}
+{#            fetch('/send-prompt', {#}
+{#                method: 'POST',#}
+{#                headers: {#}
+{#                    'Content-Type': 'application/json',#}
+{#                    'X-CSRFToken': csrfToken  // Include CSRF token for security#}
+{#                },#}
+{#                body: JSON.stringify({ prompt: prompt })#}
+{#            })#}
+{#            .then(response => response.json())#}
+{#            .then(data => {#}
+{#                // Display the response from the Django server#}
+{#                console.log('step_5')#}
+{#                document.getElementById('responseOutput').textContent = JSON.stringify(data, null, 2);#}
+{#                console.log('step_6')#}
+{#            })#}
+{#            .catch(error => {#}
+{#                console.log('step_7')#}
+{#                console.error('Error:', error);#}
+{#            });#}
+{#        });#}
+{#    </script>#}
+{#</body>#}
+{#</html>#}
