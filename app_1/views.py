@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from django.shortcuts import render
 
+from app_1.tests import save_object
+
 
 class IndexView(View):
     def get(self, request):
@@ -29,12 +31,15 @@ def send_prompt(request):
                 "model": "deepseek-r1:1.5b",
                 "prompt": prompt,
                 "stream": False,
-                "max_tokens": 100,
+                # "max_tokens": 100,
                 "temperature": 0.2
             }
 
             # Send the prompt to the Ollama service
             response = requests.post(ollama_url, json=ollama_data)
+            # test
+            # save_object('obj_1.pkl', 'save', response)  # save
+            # response = save_object('obj_1.pkl', 'load')  # load
 
             # Check if the request to Ollama was successful
             if response.status_code == 200:
